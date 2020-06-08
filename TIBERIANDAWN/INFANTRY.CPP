@@ -1048,6 +1048,29 @@ void InfantryClass::AI(void)
 	}
 
 	/*
+	**	Catch infantry that may be stuck in Boxing animations and get them out of it
+	*/
+	if (!IsBoxing)
+	{
+		switch (Doing)
+		{
+		case DO_FIGHT_READY:
+		case DO_ON_GUARD:
+		case DO_PUNCH:
+		case DO_KICK:
+		case DO_PUNCH_HIT1:
+		case DO_PUNCH_HIT2:
+		case DO_KICK_HIT1:
+		case DO_KICK_HIT2:
+			Do_Action(DO_READY_WEAPON, true);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	/*
 	**	Act on new orders if the unit is at a good position to do so.
 	*/
 	if (!IsDriving && (Doing == DO_NOTHING || MasterDoControls[Doing].Interrupt)) {
@@ -1269,7 +1292,7 @@ void InfantryClass::AI(void)
 	/*
 	**	Perform movement operations at this time.
 	*/
-	if (!IsFiring /*&& !IsBoxing*/) {
+	if (!IsFiring && !IsBoxing) {
 		if (!IsDriving) {
 
 			/*
@@ -2364,7 +2387,8 @@ BulletClass * InfantryClass::Fire_At(TARGET target, int which)
 			** Fighting done for some reason, so pick up gun
 			*/
 			IsBoxing = false;
-			Do_Action(DO_READY_WEAPON,true);
+			if (Strength) // Make sure we haven't died in the meantime
+				Do_Action(DO_READY_WEAPON,true);
 		}
 	} else {
 #endif
